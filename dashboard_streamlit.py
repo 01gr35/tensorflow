@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go # <-- IMPORTANTE: Importamos Plotly
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
@@ -106,20 +107,43 @@ with col3:
 st.markdown("---")
 
 # ====================================================================
-# 4. GRÁFICA INTERACTIVA AJUSTADA
+# 4. GRÁFICA INTERACTIVA AJUSTADA (Ahora con Plotly)
 # ====================================================================
 st.subheader(f"Tendencia y Predicción para: {ruta_seleccionada} ({horario_seleccionado})")
 
-fig, ax = plt.subplots(figsize=(14, 5))
-ax.plot(df_filtrado['Fecha'], df_filtrado['Ventas'], label="Ventas Reales", color="teal", linewidth=2)
-ax.plot(df_filtrado['Fecha'], df_filtrado['Prediccion_LSTM'], label="Pronóstico Ajustado LSTM", color="crimson", linestyle="--", linewidth=2)
-ax.set_ylabel("Cantidad de Tiquetes")
-ax.grid(True, linestyle=":", alpha=0.6)
-ax.legend()
-plt.xticks(rotation=45)
+# Crear la figura de Plotly
+fig = go.Figure()
 
-# Renderizar gráfico en Streamlit
-st.pyplot(fig)
+# Agregar la línea de Ventas Reales
+fig.add_trace(go.Scatter(
+    x=df_filtrado['Fecha'], 
+    y=df_filtrado['Ventas'], 
+    mode='lines', 
+    name='Ventas Reales',
+    line=dict(color='teal', width=2),
+    hovertemplate='<b>Fecha:</b> %{x|%Y-%m-%d}<br><b>Ventas Reales:</b> %{y} uds<extra></extra>'
+))
+
+# Agregar la línea de Pronóstico
+fig.add_trace(go.Scatter(
+    x=df_filtrado['Fecha'], 
+    y=df_filtrado['Prediccion_LSTM'], 
+    mode='lines', 
+    name='Pronóstico LSTM',
+    line=dict(color='crimson', width=2, dash='dash'),
+    hovertemplate='<b>Fecha:</b> %{x|%Y-%m-%d}<br><b>Pronóstico:</b> %{y:.0f} uds<extra></extra>'
+))
+
+# Configurar el diseño del gráfico
+fig.update_layout(
+    yaxis_title='Cantidad de Tiquetes',
+    hovermode='x unified', # Muestra ambos valores al mismo tiempo al pasar el cursor
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+    margin=dict(l=40, r=40, t=40, b=40)
+)
+
+# Renderizar en Streamlit (usar_container_width hace que ocupe todo el ancho)
+st.plotly_chart(fig, use_container_width=True)
 
 # ====================================================================
 # 5. NUEVA TABLA DETALLADA (Datos Reales vs Pronóstico)
