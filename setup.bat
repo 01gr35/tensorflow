@@ -3,9 +3,18 @@ echo ===================================================
 echo Iniciando la instalacion del entorno de TensorFlow...
 echo ===================================================
 
-:: 1. Activar el entorno virtual (ajusta el nombre si es diferente)
-echo Activando el entorno virtual tf-env-312...
-call tf-env-312\Scripts\activate
+:: 1. Activar o crear el entorno virtual
+if exist .venv\Scripts\activate.bat (
+    echo Activando el entorno virtual .venv...
+    call .venv\Scripts\activate.bat
+) else if exist tf-env-312\Scripts\activate.bat (
+    echo Activando el entorno virtual tf-env-312...
+    call tf-env-312\Scripts\activate.bat
+) else (
+    echo Creando entorno virtual .venv...
+    python -m venv .venv
+    call .venv\Scripts\activate.bat
+)
 
 :: 2. Actualizar pip
 echo Actualizando pip...
